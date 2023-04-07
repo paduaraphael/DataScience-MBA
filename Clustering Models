@@ -1,0 +1,161 @@
+def kmeans(**kargs):
+    # Getting values from kargs
+    X = kargs.get("X")
+    number_clusters = kargs.get("number_clusters")
+    # Getting data for classification metrics
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is K Means...")
+    print("Training your model...")
+    # Creating and fitting the model  
+    clf_clustering = KMeans(n_clusters=number_clusters)
+    clf_classification = KMeans(n_clusters=number_clusters)
+    
+    clf_clustering.fit(X)
+    clf_classification.fit(X_train)
+
+    print(f"Clustering your data with {number_clusters} clusters")
+    y_pred_clustering = clf_clustering.predict(X)
+    y_pred_classification = clf_classification.predict(X_test)
+    inertia = clf_clustering.inertia_
+    
+    return {"y_pred_clustering": y_pred_clustering,
+            "y_pred_classification":y_pred_classification,
+            "y_test": y_test,
+            "X": X,
+            "inertia": inertia,
+            
+           }
+
+
+def minibatch(**kargs):
+    # Getting values from kargs
+    X = kargs.get("X")
+    number_clusters = kargs.get("number_clusters")
+    # Getting data for classification metrics
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is Mini Batch K Means...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf_clustering = MiniBatchKMeans(n_clusters=number_clusters, batch_size=20000)
+    clf_classification = MiniBatchKMeans(n_clusters=number_clusters, batch_size=20000)
+    clf_clustering.fit(X)
+    clf_classification.fit(X_train)
+
+    print(f"Clustering your data with {number_clusters} clusters")
+    y_pred_clustering = clf_clustering.predict(X)
+    y_pred_classification = clf_classification.predict(X_test)
+    inertia = clf_clustering.inertia_
+    
+    return {"y_pred_clustering": y_pred_clustering,
+            "y_pred_classification":y_pred_classification,
+            "y_test": y_test,
+            "X": X,
+            "inertia": inertia,
+           }
+
+
+def meanshift(**kargs):
+    # Getting values from kargs
+    X = kargs.get("X")
+    number_clusters = kargs.get("number_clusters")
+    # Getting data for classification metrics
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is Mean Shift...")
+    print("Training your model...")
+    # Creating and fitting the model
+    bandwidth = estimate_bandwidth(X, quantile=0.25, n_samples=1000)
+    clf_clustering = MeanShift(bandwidth=bandwidth)
+    clf_classification = MeanShift(bandwidth=bandwidth)
+    clf_clustering.fit(X)
+    clf_classification.fit(X_train)
+    
+    # Getting number of estimated clusters
+    labels = clf_clustering.labels_
+    labels_unique = np.unique(labels)
+    number_clusters = len(labels_unique)
+
+    print(f"Estimated number of clusters: {number_clusters}")
+    print(f"Clustering your data with {number_clusters} clusters")
+    y_pred_clustering = clf_clustering.predict(X)
+    y_pred_classification = clf_classification.predict(X_test)
+    
+    return {"y_pred_clustering": y_pred_clustering,
+            "y_pred_classification":y_pred_classification,
+            "y_test": y_test,
+            "X": X,
+           }
+
+
+def spectral_clustering(**kargs):
+    # Getting values from kargs
+    X = kargs.get("X")
+    number_clusters = kargs.get("number_clusters")
+    # Getting data for classification metrics
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is Spectral Clustering...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf_clustering = SpectralClustering(n_clusters=number_clusters)
+    clf_classification = SpectralClustering(n_clusters=number_clusters)
+    print(f"Clustering your data with {number_clusters} clusters")
+    
+    clf_clustering.fit(X)
+    clf_classification.fit(X_train)
+    
+    #y_pred = clf.fit_predict(X)
+    y_pred_clustering = clf_clustering.fit_predict(X)
+    y_pred_classification = clf_classification.fit_predict(X_test)
+    #y_pred_clustering = clf_clustering.predict(X)
+    #y_pred_classification = clf_classification.predict(X_test)
+
+    
+    return {"y_pred_clustering": y_pred_clustering,
+            "y_pred_classification":y_pred_classification,
+            "X": X,
+            "y_test": y_test
+           }
+
+
+def gmm(**kargs):
+    # Getting values from kargs
+    X = kargs.get("X")
+    number_clusters = kargs.get("number_clusters")
+    # Getting data for classification metrics
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is GMM...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf_clustering = GaussianMixture(n_components=number_clusters)
+    clf_classification = GaussianMixture(n_components=number_clusters)
+    clf_clustering.fit(X)
+    clf_classification.fit(X_train)
+
+    print(f"Clustering your data with {number_clusters} clusters")
+    y_pred_clustering = clf_clustering.predict(X)
+    y_pred_classification = clf_classification.predict(X_test)
+    
+    return {"y_pred_clustering": y_pred_clustering,
+            "y_pred_classification":y_pred_classification,
+            "y_test": y_test,
+            "X": X,
+           }
