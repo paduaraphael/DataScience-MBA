@@ -1,0 +1,52 @@
+def classification_metrics(**kargs):
+    # Getting values from kargs
+    y_test = kargs.get("y_test")
+    y_pred = kargs.get("y_pred")
+
+    # Evaluating the model
+    print(confusion_matrix(y_test,y_pred))
+    print(classification_report(y_test,y_pred))
+    print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
+    print(f"Precision: {precision_score(y_test, y_pred, average = 'weighted')}")
+    
+    return {"Accuracy": accuracy_score(y_test, y_pred),
+            "Precision": precision_score(y_test, y_pred, average = 'weighted')
+           }
+
+
+def regression_metrics(**kargs):
+    # Getting values from kargs
+    y_test = kargs.get("y_test")
+    y_pred = kargs.get("y_pred")
+    
+    # Evaluating the model
+    print("Mean Squared Error:", mean_squared_error(y_test, y_pred))
+   # mean_squared_error(y_actual, y_predicted, squared=False)
+    print("R score:", r2_score(y_test, y_pred))
+    print("Mean Absolute Error:", mean_absolute_error(y_test,y_pred))
+      
+    return {"R score": r2_score(y_test, y_pred)
+           }
+
+
+def clustering_metrics(**kargs):
+    # Getting values from kargs
+    y_pred_clustering = kargs.get("y_pred_clustering")
+    y_pred_classification = kargs.get("y_pred_classification")
+    X = kargs.get("X")
+    inertia = kargs.get("inertia")
+    y_test = kargs.get("y_test") # getting the actual answers to compare on classification metrics
+
+    # Evaluating the model
+    print("Silhouette Score:", silhouette_score(X, y_pred_clustering))
+    print("Calinski Harabasz Score:", calinski_harabasz_score(X, y_pred_clustering))
+    print("Davies Bouldin Score:", davies_bouldin_score(X, y_pred_clustering))
+    print("Inertia:", inertia)
+    print(f"Accuracy: {accuracy_score(y_test, y_pred_classification)}")
+    print(f"Precision: {precision_score(y_test, y_pred_classification, average = 'weighted')}")
+       
+    return {"Accuracy": accuracy_score(y_test, y_pred_classification),
+            "Precision": precision_score(y_test, y_pred_classification, average = 'weighted'),
+            "y_pred_clustering": y_pred_clustering,
+            "y_pred_classification": y_pred_classification
+           }
