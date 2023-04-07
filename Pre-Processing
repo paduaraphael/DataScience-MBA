@@ -1,0 +1,208 @@
+# Defining the function to remove punctuation
+def remove_punctuation(text):
+    punctuation_free_text = "".join([i for i in text if i not in string.punctuation])
+    return punctuation_free_text
+
+# Defining the function to apply Lemmatization
+def lemmatize_text(text):
+    wordlist=[]
+    lemmatizer = WordNetLemmatizer() 
+    sentences=sent_tokenize(text)
+    for sentence in sentences:
+        words=word_tokenize(sentence)
+        for word in words:
+            wordlist.append(lemmatizer.lemmatize(word))
+    return ' '.join(wordlist)
+
+def basic_data_preparation(**kargs):
+    dataframe = kargs.get("dataframe")
+    # Handling missing values
+    # Permitir mais flexibilidade ao usuário para gerenciar missing values no futuro
+    # Escolher entre remover linhas ou colunas ou adicionar valores
+    # Adicionar 10% threshold para remover valores?
+    print("Checking for missing values...")
+    print(dataframe.isnull().sum())
+    if dataframe.isnull().sum().sum() != 0:
+        print("Removing rows with missing values...")
+        dataframe = dataframe.dropna(axis=0) # axis = 1 would remove the column with missing value
+    else:
+        print("No missing values found")
+        pass
+    
+    return {"cleaned_dataframe": dataframe,
+           "target_variable": target_variable,
+            "columns_to_drop": columns_to_drop,
+            "numerical_vars": numerical_vars,
+            "categorical_vars": categorical_vars
+    }   
+
+
+
+def split_dataset(**kargs):
+    print("Preparing your dataset for training...")
+    
+    # Getting data from previous function
+    cleaned_dataframe = kargs.get("cleaned_dataframe")
+    target_variable = kargs.get("target_variable")
+    columns_to_drop = kargs.get("columns_to_drop")
+    numerical_vars = kargs.get("numerical_vars")
+    categorical_vars = kargs.get("categorical_vars")
+    
+    # Separate target from features and remove id column
+    columns_to_drop.append(target_variable)
+    print(f"Removing columns {columns_to_drop} from the dataset...")
+    X = cleaned_dataframe.drop(columns_to_drop, axis=1)
+    y = cleaned_dataframe[target_variable]
+    
+    # Handling categorical variables
+    if categorical_vars is None:
+        print("No categorical variables found to be pre-processed...")
+    else:
+        print("Applying One Hot Encoding to categorical variables...")
+        for var in categorical_vars:
+            X[var] = X[var].astype('category')
+    
+        X = pd.get_dummies(X, drop_first=True)
+    
+    # Separate train and test split
+    test_size = 0.20
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size)
+    print(f"Splitting train and test samples with a {test_size*100}% ratio")
+       
+    # Scale dataset
+    # using StdScaler > Might add more options in the future?
+
+    if numerical_vars is None:
+        print("No numerical variables found to be scaled...")
+    else:
+        scaler = StandardScaler()
+        print(f"Scaling numeric columns using {scaler}...")
+        scaler.fit(X_train[numerical_vars])
+        X_train[numerical_vars] = scaler.transform(X_train[numerical_vars])
+        X_test[numerical_vars] = scaler.transform(X_test[numerical_vars])
+
+    return {"X_train": X_train,
+            "X_test": X_test,
+            "y_train": y_train,
+            "y_test": y_test
+    } 
+
+
+def prep_cluster_dataset(**kargs):
+    print("Preparing your dataset for training...")
+    
+    # Getting data from previous function
+    cleaned_dataframe = kargs.get("cleaned_dataframe")
+    columns_to_drop = kargs.get("columns_to_drop")
+    numerical_vars = kargs.get("numerical_vars")
+    categorical_vars = kargs.get("categorical_vars")
+    target_variable = kargs.get("target_variable")
+    
+    # Separate target from features and remove id column
+    columns_to_drop.append(target_variable)
+    print(f"Removing columns {columns_to_drop} from the dataset...")
+    X = cleaned_dataframe.drop(columns_to_drop, axis=1) 
+    y = cleaned_dataframe[target_variable]
+    encoder = LabelEncoder()
+    y = encoder.fit_transform(y)
+
+    # Handling categorical variables
+    print("Applying One Hot Encoding to categorical variables...")
+    for var in categorical_vars:
+        X[var] = X[var].astype('category')
+    
+    X = pd.get_dummies(X, drop_first=True)
+ 
+    # Splitting train and test to use classification metrics
+    test_size = 0.20
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size)
+    print(f"Splitting train and test samples with a {test_size*100}% ratio")
+    
+    # Scale dataset
+    if numerical_vars is None:
+        print("No numerical variables found to be scaled...")
+    else:
+        scaler = StandardScaler()
+        print(f"Scaling numeric columns using {scaler}...")
+        scaler.fit(X_train[numerical_vars])
+        X_train[numerical_vars] = scaler.transform(X_train[numerical_vars])
+        X_test[numerical_vars] = scaler.transform(X_test[numerical_vars])
+    
+        # Scaling the whole dataset to use clustering metrics
+        scaler.fit(X[numerical_vars])
+        X[numerical_vars] = scaler.transform(X[numerical_vars])
+
+    return {"X": X,
+            "number_clusters": number_clusters,
+            "X_train": X_train,
+            "X_test": X_test,
+            "y_train": y_train,
+            "y_test": y_test
+    } 
+
+
+def prep_text_dataset(**kargs):
+    print("Preparing your dataset for training...")
+    
+    # Getting data from previous function
+    cleaned_dataframe = kargs.get("cleaned_dataframe")
+    target_variable = kargs.get("target_variable")
+    
+    # Replacing text column with the puntuation free text
+    cleaned_dataframe = cleaned_dataframe.copy() # creating a copy to deal with SettingWithCopyWarning
+    cleaned_dataframe['description']= cleaned_dataframe['description'].apply(lambda x:remove_punctuation(x))
+    
+    # Applying lowercase to all words in the punctuation free text column
+    cleaned_dataframe['description']= cleaned_dataframe['description'].apply(lambda x: x.lower())
+    
+    # Applying Tokenization
+    cleaned_dataframe['tokenize'] = cleaned_dataframe['description'].apply(word_tokenize)
+    
+    # Applying stopwords function using English as default
+    stop_words = set(stopwords.words('english'))
+    cleaned_dataframe['no_stopwords'] = cleaned_dataframe['tokenize'].apply(
+        lambda x: " ".join(i for i in x if i not in stop_words)
+    )
+    
+    # Applying stemming
+    st = PorterStemmer()
+    cleaned_dataframe['stemming'] = cleaned_dataframe['no_stopwords'].apply(
+        lambda x: " ".join([st.stem(word) for word in x.split()])
+    )
+    
+    # Applying lemmatization
+    cleaned_dataframe['lemmatized'] = cleaned_dataframe['stemming'].apply(lemmatize_text)
+    
+    # Applying Counter Vectoe & TFIDF
+    counter = Counter(cleaned_dataframe[target_variable].tolist())
+    description_list = cleaned_dataframe['lemmatized'].tolist()
+    top_varieties = {i[0]: idx for idx, i in enumerate(counter.most_common())}
+    cleaned_dataframe[cleaned_dataframe[target_variable].map(lambda x: x in top_varieties)]
+    varietal_list = [top_varieties[i] for i in cleaned_dataframe[target_variable].tolist()]
+    varietal_list = np.array(varietal_list)
+
+    count_vect = CountVectorizer()
+    #x_train_counts = count_vect.fit_transform(description_list)
+
+    tfidf_transformer = TfidfTransformer()
+    #x_train_tfidf = tfidf_transformer.fit_transform(x_train_counts)
+    
+    # Separate train and test split
+    test_size = 0.20
+    X_train, X_test, y_train, y_test = train_test_split(description_list, varietal_list, test_size=test_size)
+    X_train = count_vect.fit_transform(X_train)
+    X_train = tfidf_transformer.fit_transform(X_train)
+    X_test = count_vect.transform(X_test)
+    X_test = tfidf_transformer.transform(X_test)
+    print(f"Splitting train and test samples with a {test_size*100}% ratio")
+
+    return {"X_train": X_train,
+            "X_test": X_test,
+            "y_train": y_train,
+            "y_test": y_test
+    } 
+
+
+def fn_none(**kargs):
+    #print(kargs)
+    return kargs
