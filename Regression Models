@@ -1,0 +1,217 @@
+def ridge_regression(**kargs):
+    # Getting values from kargs
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is Ridge Regression...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf = Ridge()
+    clf.fit(X_train, y_train)
+    
+    # Using GridSearchCV to find optimum parameters
+    params = {
+                'alpha': [100, 10, 1,0.1,0.01,0.001] ,
+                "fit_intercept": [True, False],
+                "solver": ['svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga']
+             }
+
+    print(f"Optimizing your model using {params}")
+    clf_grid= GridSearchCV(clf, params, scoring='neg_mean_squared_error', cv=5)
+
+    # Fit the grid search model to the train data
+    clf_grid.fit(X_train,y_train)
+
+    # Best estimator
+    print(f"Best estimator: {clf_grid.best_estimator_}")
+    print(f"Best parameters: {clf_grid.best_params_}")
+    
+    y_pred = clf_grid.best_estimator_.predict(X_test)
+    
+    return {"y_pred": y_pred,
+            "y_test": y_test
+           }
+
+
+def lasso_regression(**kargs):
+    # Getting values from kargs
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is Lasso Regression...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf = Lasso(tol=1e-2)
+    clf.fit(X_train, y_train)
+    
+    # Using GridSearchCV to find optimum parameters
+    params = {
+               'alpha': [1,0.1,0.01,0.001]
+             }
+    
+    print(f"Optimizing your model using {params}")
+    clf_grid= GridSearchCV(clf, params, scoring='neg_mean_squared_error', cv=5)
+
+    # Fit the grid search model to the train data
+    clf_grid.fit(X_train,y_train)
+
+    # Best estimator
+    print(f"Best estimator: {clf_grid.best_estimator_}")
+    print(f"Best parameters: {clf_grid.best_params_}")
+    
+    y_pred = clf_grid.best_estimator_.predict(X_test)
+    
+    return {"y_pred": y_pred,
+            "y_test": y_test
+           }
+
+
+def sgd_regression(**kargs):
+    # Getting values from kargs
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is SGD Regression...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf = SGDRegressor()
+    clf.fit(X_train, y_train)
+    
+    # Using GridSearchCV to find optimum parameters
+    params = {
+               "penalty": ['l1', 'l2', 'elasticnet'],
+               "alpha": [0.01, 0.1, 1, 10, 100, 1000],
+                "learning_rate": ['constant', 'optimal', 'invscaling', 'adaptive'],
+               "eta0": [1, 10, 100]
+             }
+    
+    print(f"Optimizing your model using {params}")
+    clf_grid= GridSearchCV(clf, params, scoring='neg_mean_squared_error', cv=5)
+
+    # Fit the grid search model to the train data
+    clf_grid.fit(X_train,y_train)
+
+    # Best estimator
+    print(f"Best estimator: {clf_grid.best_estimator_}")
+    print(f"Best parameters: {clf_grid.best_params_}")
+    
+    y_pred = clf_grid.best_estimator_.predict(X_test)
+    
+    return {"y_pred": y_pred,
+            "y_test": y_test
+           }
+
+
+def elasticnet_regression(**kargs):
+    # Getting values from kargs
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is Elastic Net Regression...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf = ElasticNet()
+    clf.fit(X_train, y_train)
+    
+    # Using GridSearchCV to find optimum parameters
+    params = {
+                'alpha': [100, 10, 1,0.1,0.01,0.001] ,
+                "l1_ratio": np.arange(0.0, 1.0, 0.1),
+             }
+
+    print(f"Optimizing your model using {params}")
+    clf_grid= GridSearchCV(clf, params, scoring='neg_mean_squared_error', cv=5)
+
+    # Fit the grid search model to the train data
+    clf_grid.fit(X_train,y_train)
+
+    # Best estimator
+    print(f"Best estimator: {clf_grid.best_estimator_}")
+    print(f"Best parameters: {clf_grid.best_params_}")
+    
+    y_pred = clf_grid.best_estimator_.predict(X_test)
+    
+    return {"y_pred": y_pred,
+            "y_test": y_test
+           }
+
+
+def svr(**kargs):
+    # Getting values from kargs
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is SVR...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf = SVR()
+    clf.fit(X_train, y_train)
+    
+    # Using GridSearchCV to find optimum parameters
+    params = {
+                'epsilon': [1,0.1,0.01,0.001] ,
+                "kernel": ['linear', 'rbf'],
+                "C": [1,10,25,50,75,100]
+             }
+
+    print(f"Optimizing your model using {params}")
+    clf_grid= GridSearchCV(clf, params, scoring='neg_mean_squared_error', cv=5)
+
+    # Fit the grid search model to the train data
+    clf_grid.fit(X_train,y_train)
+
+    # Best estimator
+    print(f"Best estimator: {clf_grid.best_estimator_}")
+    print(f"Best parameters: {clf_grid.best_params_}")
+    
+    y_pred = clf_grid.best_estimator_.predict(X_test)
+    
+    return {"y_pred": y_pred,
+            "y_test": y_test
+           }
+
+
+def random_forest_regressor(**kargs):
+    # Getting values from kargs
+    X_train = kargs.get("X_train")
+    X_test = kargs.get("X_test")
+    y_train = kargs.get("y_train")
+    y_test = kargs.get("y_test")
+    
+    print("The suggested algorithm is Random Forest Regressor...")
+    print("Training your model...")
+    # Creating and fitting the model
+    clf = RandomForestRegressor()
+    clf.fit(X_train, y_train)
+    
+    # Using GridSearchCV to find optimum parameters
+    params = {'max_depth':[3,5,10,None],
+              'n_estimators':[50,100,150, 200, 250],
+              'max_features':['sqrt', 'log2', None]
+            }
+
+    print(f"Optimizing your model using {params}")
+    clf_grid= GridSearchCV(clf, params, scoring='neg_mean_squared_error', cv=5)
+
+    # Fit the grid search model to the train data
+    clf_grid.fit(X_train,y_train)
+
+    # Best estimator
+    print(f"Best estimator: {clf_grid.best_estimator_}")
+    print(f"Best parameters: {clf_grid.best_params_}")
+    
+    y_pred = clf_grid.best_estimator_.predict(X_test)
+    
+    return {"y_pred": y_pred,
+            "y_test": y_test
+           }
